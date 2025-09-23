@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2101.1.10]
+
+### Added
+* Added better player feedback when Ultimining can't be done for any reason
+  * The reason is shown in the ultimine panel, under the "Ultimine is not active" text
+  * Thanks @lupusagax
+* Added `currentBlockSelection()` method to the API, to check what block positions (if any) are in a player's ultimine selection
+* Added `es_es` translations (thanks @lupusagax)
+* Added `de_de` translations (thanks @F1kMajus)
+
 ## [2101.1.9]
 
 ### Fixed

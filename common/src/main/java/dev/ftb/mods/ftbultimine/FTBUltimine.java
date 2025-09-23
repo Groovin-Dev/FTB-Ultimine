@@ -17,6 +17,7 @@ import dev.ftb.mods.ftbultimine.api.rightclick.RegisterRightClickHandlerEvent;
 import dev.ftb.mods.ftbultimine.api.shape.RegisterShapeEvent;
 import dev.ftb.mods.ftbultimine.api.shape.Shape;
 import dev.ftb.mods.ftbultimine.api.shape.ShapeContext;
+import dev.ftb.mods.ftbultimine.api.util.CanUltimineResult;
 import dev.ftb.mods.ftbultimine.api.util.ItemCollector;
 import dev.ftb.mods.ftbultimine.client.FTBUltimineClient;
 import dev.ftb.mods.ftbultimine.config.FTBUltimineClientConfig;
@@ -192,22 +193,14 @@ public class FTBUltimine {
 	}
 
 	/**
-	 * Validates if a tool is correct to use. If the strict tag is on an item it applies to the main and offhand slots.
-	 * If to deny tag is on an item it'll deny the main hand item, not sure where this would be required... If the required
-	 * tool config is on, we have to be either a {@link TieredItem} or have a max damage, or be added to the ALLOW_TAG.
-	 *
-	 * If no strict deny and no normal deny, and we do not require a tool via config then let everything through
+	 * Validates if a tool is correct to use. If the required tool config is on, we have to be either a {@link TieredItem}
+	 * or have a max damage, or be added to the ALLOW_TAG.
 	 *
 	 * @param mainHand item in the main hand
-	 * @param offHand  item in the offhand
 	 *
 	 * @return if the tool is valid to be used
 	 */
-	public static boolean isValidTool(ItemStack mainHand, ItemStack offHand) {
-		if (mainHand.is(STRICT_DENY_TAG) || offHand.is(STRICT_DENY_TAG) || mainHand.is(DENY_TAG)) {
-			return false;
-		}
-
+	public static boolean isValidTool(ItemStack mainHand) {
 		if (FTBUltimineServerConfig.REQUIRE_TOOL.get()) {
 			if (mainHand.isEmpty()) {
 				return false;
@@ -219,26 +212,49 @@ public class FTBUltimine {
 		return true;
 	}
 
-	public boolean canUltimine(Player player) {
-		if (PlayerHooks.isFake(player) || player.getUUID() == null || CooldownTracker.isOnCooldown(player)) {
-			return false;
+	/**
+	 * Determines if the player is currently allowed to use Ultimine. Provides the reason it is not allowed as relevant.
+	 * <p>
+	 * Does not determine if there is a valid target for ultimine, hence the "ALLOWED" result pointing at the
+	 * "no valid block" reason. If there is a result of ALLOWED and valid blocks returned from
+	 * {@link FTBUltiminePlayerData#updateBlocks}, ultimine should be active and working.
+	 *
+	 * @param player Player to check status for
+	 * @return Result object with the reason that ultimine is not allowed.
+	 */
+	public CanUltimineResult canUltimine(Player player) {
+		if (PlayerHooks.isFake(player) || player.getUUID() == null) {
+			return CanUltimineResult.OTHER_RESTRICTION;
+		}
+
+		if (CooldownTracker.isOnCooldown(player)) {
+			return CanUltimineResult.ON_COOLDOWN;
 		}
 
 		if (player.getFoodData().getFoodLevel() <= 0 && !player.isCreative()) {
-			return false;
+			return CanUltimineResult.NO_FOOD;
 		}
 
 		if (!permissionOverride.test(player)) {
-			return false;
+			return CanUltimineResult.NO_PERMISSION;
 		}
 
 		var mainHand = player.getMainHandItem();
 		var offHand = player.getOffhandItem();
-		return isValidTool(mainHand, offHand) && RestrictionHandlerRegistry.INSTANCE.canUltimine(player);
+		/* Check if the current tool has a deny tag. strict deny applies to either hand. */
+		if (mainHand.is(STRICT_DENY_TAG) || offHand.is(STRICT_DENY_TAG) || mainHand.is(DENY_TAG)) {
+			return CanUltimineResult.BLOCKED_TOOL;
+		}
+
+		if (!isValidTool(mainHand)) {
+			return CanUltimineResult.NO_TOOL;
+		}
+
+		return RestrictionHandlerRegistry.INSTANCE.canUltimine(player);
 	}
 
 	public EventResult blockBroken(Level world, BlockPos origPos, BlockState state, ServerPlayer player, @Nullable IntValue xp) {
-		if (isBreakingBlock || !canUltimine(player)) {
+		if (isBreakingBlock || !canUltimine(player).isAllowed()) {
 			return EventResult.pass();
 		}
 		FTBUltiminePlayerData data = getOrCreatePlayerData(player);

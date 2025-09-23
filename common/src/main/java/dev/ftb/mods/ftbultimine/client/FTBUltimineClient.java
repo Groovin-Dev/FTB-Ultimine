@@ -14,6 +14,7 @@ import dev.architectury.networking.NetworkManager;
 import dev.architectury.registry.client.keymappings.KeyMappingRegistry;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.ui.GuiHelper;
+import dev.ftb.mods.ftbultimine.api.util.CanUltimineResult;
 import dev.ftb.mods.ftbultimine.CooldownTracker;
 import dev.ftb.mods.ftbultimine.FTBUltimine;
 import dev.ftb.mods.ftbultimine.FTBUltimineCommon;
@@ -38,6 +39,8 @@ import net.minecraft.network.chat.TextColor;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -53,6 +56,7 @@ public class FTBUltimineClient extends FTBUltimineCommon {
 
 	private boolean pressed;
 	private boolean canUltimine;
+	private CanUltimineResult canUltimineStatus;
 	private List<BlockPos> shapeBlocks = Collections.emptyList();
 	private int actualBlocks = 0;
 	private List<CachedEdge> cachedEdges = null;
@@ -186,14 +190,19 @@ public class FTBUltimineClient extends FTBUltimineCommon {
 		ImmutableList.Builder<IndentedLine> builder = ImmutableList.builder();
 
 		Component msg;
+		boolean isActive = true;
 		if (CooldownTracker.isOnCooldown(getClientPlayer())) {
-			msg = Component.translatable("ftbultimine.info.cooldown").withStyle(style -> style.withColor(TextColor.fromRgb(0xBFBF8C)));
+			msg = Component.translatable("ftbultimine.info.cooldown").withStyle(style -> style.withColor(TextColor.fromRgb(0xBFBF6C)));
 		} else if (canUltimine && actualBlocks > 0) {
 			msg = Component.translatable("ftbultimine.info.active").withStyle(style -> style.withColor(TextColor.fromRgb(0xA3BE8C)));
 		} else {
 			msg = Component.translatable("ftbultimine.info.not_active").withStyle(style -> style.withColor(TextColor.fromRgb(0xBF616A)));
+			isActive = false;
 		}
 		builder.add(new IndentedLine(0, Component.translatable("ftbultimine.info.base", msg)));
+		if (!isActive) {
+			builder.add(new IndentedLine(8, Component.translatable(canUltimineStatus.getTranslationKey()).withStyle(style -> style.withColor(TextColor.fromRgb(0xBF616A)))));
+		}
 
 		ShapeRegistry shapeRegistry = ShapeRegistry.INSTANCE;
 		int context = Math.min((shapeRegistry.shapeCount() - 1) / 2, FTBUltimineClientConfig.SHAPE_MENU_CONTEXT_LINES.get());
@@ -201,7 +210,9 @@ public class FTBUltimineClient extends FTBUltimineCommon {
 		boolean showingMenu = isMenuSneaking();
 
 		if (showingMenu) {
-			builder.add(new IndentedLine(0, Component.empty()));
+			if (isActive) {
+				builder.add(new IndentedLine(0, Component.empty()));
+			}
 			for (int i = -context; i < 0; i++) {
 				builder.add(new IndentedLine(16, shapeRegistry.getShape(shapeIdx + i).getDisplayName().withStyle(ChatFormatting.GRAY)));
 			}
@@ -306,8 +317,10 @@ public class FTBUltimineClient extends FTBUltimineCommon {
 				mc.player.displayClientMessage(msg1, true);
 			}
 		}
-
-		canUltimine = pressed && FTBUltimine.instance.canUltimine(mc.player);
+		canUltimineStatus = mc.hitResult instanceof BlockHitResult b && b.getType() == HitResult.Type.BLOCK ?
+				FTBUltimine.instance.canUltimine(mc.player) :
+				CanUltimineResult.NO_BLOCK_TARGETED;
+		canUltimine = pressed && (canUltimineStatus.isAllowed());
 
 		if (pressed) {
 			infoPanelList = addPressedInfo();
