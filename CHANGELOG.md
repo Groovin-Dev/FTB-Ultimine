@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2101.1.11]
+
+### Fixed
+* Better right-click functionality for axes, shovels & hoes
+  * No noticeable difference for vanilla tools, but should work better with modded tools with custom conversion behaviours
+  
 ## [2101.1.10]
 
 ### Added
