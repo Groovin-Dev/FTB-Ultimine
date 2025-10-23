@@ -200,16 +200,25 @@ public class FTBUltimine {
 	 *
 	 * @return if the tool is valid to be used
 	 */
-	public static boolean isValidTool(ItemStack mainHand) {
-		if (FTBUltimineServerConfig.REQUIRE_TOOL.get()) {
-			if (mainHand.isEmpty()) {
-				return false;
-			}
+	public static boolean isValidTool(ItemStack mainHand, BlockState state) {
+		boolean hasAnyTool = !FTBUltimineServerConfig.REQUIRE_TOOL.get()
+				|| !mainHand.isEmpty() && (mainHand.getItem() instanceof TieredItem || mainHand.getMaxDamage() > 0 || mainHand.is(ALLOW_TAG));
 
-			return mainHand.getItem() instanceof TieredItem || mainHand.getMaxDamage() > 0 || mainHand.is(ALLOW_TAG);
-		}
+		boolean hasValidTool = !FTBUltimineServerConfig.REQUIRE_VALID_TOOL_FOR_BLOCK.get()
+				|| !state.requiresCorrectToolForDrops()
+				|| mainHand.isCorrectToolForDrops(state);
 
-		return true;
+		return hasAnyTool && hasValidTool;
+
+//		if (FTBUltimineServerConfig.REQUIRE_TOOL.get()) {
+//			if (mainHand.isEmpty()) {
+//				return false;
+//			}
+//
+//			return mainHand.getItem() instanceof TieredItem || mainHand.getMaxDamage() > 0 || mainHand.is(ALLOW_TAG);
+//		}
+//
+//		return true;
 	}
 
 	/**
@@ -220,9 +229,10 @@ public class FTBUltimine {
 	 * {@link FTBUltiminePlayerData#updateBlocks}, ultimine should be active and working.
 	 *
 	 * @param player Player to check status for
+	 * @param state the blockstate being broken (or about to be broken)
 	 * @return Result object with the reason that ultimine is not allowed.
 	 */
-	public CanUltimineResult canUltimine(Player player) {
+	public CanUltimineResult canUltimine(Player player, BlockState state) {
 		if (PlayerHooks.isFake(player) || player.getUUID() == null) {
 			return CanUltimineResult.OTHER_RESTRICTION;
 		}
@@ -246,7 +256,7 @@ public class FTBUltimine {
 			return CanUltimineResult.BLOCKED_TOOL;
 		}
 
-		if (!isValidTool(mainHand)) {
+		if (!isValidTool(mainHand, state)) {
 			return CanUltimineResult.NO_TOOL;
 		}
 
@@ -254,7 +264,7 @@ public class FTBUltimine {
 	}
 
 	public EventResult blockBroken(Level world, BlockPos origPos, BlockState state, ServerPlayer player, @Nullable IntValue xp) {
-		if (isBreakingBlock || !canUltimine(player).isAllowed()) {
+		if (isBreakingBlock || !canUltimine(player, state).isAllowed()) {
 			return EventResult.pass();
 		}
 		FTBUltiminePlayerData data = getOrCreatePlayerData(player);
@@ -299,7 +309,7 @@ public class FTBUltimine {
 			}
 
 			float destroySpeed = state1.getDestroySpeed(world, pos);
-			if (!player.isCreative() && (destroySpeed < 0 || destroySpeed > baseSpeed || !player.hasCorrectToolForDrops(state1))) {
+			if (!player.isCreative() && (destroySpeed < 0 || destroySpeed > baseSpeed /*|| !player.hasCorrectToolForDrops(state1)*/)) {
 				continue;
 			}
 			if (!tryBreakBlock(player, pos, state, shape, bhr) && FTBUltimineServerConfig.CANCEL_ON_BLOCK_BREAK_FAIL.get()) {
