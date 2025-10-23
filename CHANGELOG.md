@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Added "Require Valid Tool" server config setting
   * In addition to "Require Tool"
   * Default is false. If true, player must be holding a valid tool for the block being ultimined, i.e. be able to harvest the block's drops
+  * When false, this means that ultimining now works on blocks not normally harvestable
+    * e.g. ultimining stone with a bare hand (although blocks will of course still not be dropped as items)
 
 ## [2101.1.11]
 
