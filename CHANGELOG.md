@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2101.1.12]
+
+### Added
+* Added "Require Valid Tool" server config setting
+  * In addition to "Require Tool"
+  * Default is false. If true, player must be holding a valid tool for the block being ultimined, i.e. be able to harvest the block's drops
+
 ## [2101.1.11]
 
 ### Fixed
