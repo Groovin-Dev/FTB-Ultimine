@@ -209,16 +209,6 @@ public class FTBUltimine {
 				|| mainHand.isCorrectToolForDrops(state);
 
 		return hasAnyTool && hasValidTool;
-
-//		if (FTBUltimineServerConfig.REQUIRE_TOOL.get()) {
-//			if (mainHand.isEmpty()) {
-//				return false;
-//			}
-//
-//			return mainHand.getItem() instanceof TieredItem || mainHand.getMaxDamage() > 0 || mainHand.is(ALLOW_TAG);
-//		}
-//
-//		return true;
 	}
 
 	/**
