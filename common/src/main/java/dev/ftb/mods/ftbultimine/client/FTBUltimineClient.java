@@ -97,7 +97,7 @@ public class FTBUltimineClient extends FTBUltimineCommon {
 			cachedEdges = null;
 			updateEdges();
 		}
-		if (!pressed) {
+		if (!pressed && FTBUltimineClientConfig.SHAPE_FEEDBACK_MESSAGE.get()) {
 			Minecraft.getInstance().player.displayClientMessage(
 					Component.translatable("key.ftbultimine").append(" : ").append(ShapeRegistry.INSTANCE.getShape(shapeIdx).getDisplayName()),
 					true);
