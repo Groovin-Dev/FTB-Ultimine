@@ -88,6 +88,7 @@ public class FTBUltimine {
 	public static final TagKey<Block> BLOCK_WHITELIST = TagKey.create(Registries.BLOCK, FTBUltimineAPI.id("block_whitelist"));
 	public static final TagKey<Block> TILLABLE_TAG = TagKey.create(Registries.BLOCK, FTBUltimineAPI.id("farmland_tillable"));
 	public static final TagKey<Block> FLATTENABLE_TAG = TagKey.create(Registries.BLOCK, FTBUltimineAPI.id("shovel_flattenable"));
+	public static final TagKey<Block> SINGLE_CROP_HARVESTING_BLACKLIST = TagKey.create(Registries.BLOCK, FTBUltimineAPI.id("single_crop_harvesting_blacklist"));
 
 	private static Predicate<Player> permissionOverride = player -> true;
 
