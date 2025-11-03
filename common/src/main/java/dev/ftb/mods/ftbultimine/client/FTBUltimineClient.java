@@ -162,9 +162,9 @@ public class FTBUltimineClient extends FTBUltimineCommon {
 		}
 
 		boolean nextMode;
-		if (PlatformUtil.doesKeybindMatch(keyBindPrevMode, keyCode, scanCode, modifiers)) {
+		if (ClientPlatformUtil.doesKeybindMatch(keyBindPrevMode, keyCode, scanCode, modifiers)) {
 			nextMode = false;
-		} else if (PlatformUtil.doesKeybindMatch(keyBindNextMode, keyCode, scanCode, modifiers)) {
+		} else if (ClientPlatformUtil.doesKeybindMatch(keyBindNextMode, keyCode, scanCode, modifiers)) {
 			nextMode = true;
 		} else {
 			return EventResult.pass();
@@ -318,7 +318,7 @@ public class FTBUltimineClient extends FTBUltimineCommon {
 			}
 		}
 		canUltimineStatus = mc.hitResult instanceof BlockHitResult b && b.getType() == HitResult.Type.BLOCK ?
-				FTBUltimine.instance.canUltimine(mc.player, mc.player.level().getBlockState(b.getBlockPos())) :
+				FTBUltimine.instance.canUltimine(mc.player, b.getBlockPos(), mc.player.level().getBlockState(b.getBlockPos())) :
 				CanUltimineResult.NO_BLOCK_TARGETED;
 		canUltimine = pressed && (canUltimineStatus.isAllowed());
 

@@ -33,6 +33,7 @@ import dev.ftb.mods.ftbultimine.net.SyncUltimineTimePacket;
 import dev.ftb.mods.ftbultimine.net.SyncUltimineTimePacket.TimeType;
 import dev.ftb.mods.ftbultimine.rightclick.*;
 import dev.ftb.mods.ftbultimine.shape.*;
+import dev.ftb.mods.ftbultimine.utils.PlatformUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
@@ -196,17 +197,21 @@ public class FTBUltimine {
 	 * Validates if a tool is correct to use. If the required tool config is on, we have to be either a {@link TieredItem}
 	 * or have a max damage, or be added to the ALLOW_TAG.
 	 *
-	 * @param mainHand item in the main hand
+	 * @param player player being checked
 	 *
-	 * @return if the tool is valid to be used
+	 * @return if the player's equipped tool is valid to be used
 	 */
-	public static boolean isValidTool(ItemStack mainHand, BlockState state) {
+	public static boolean isValidTool(Player player, BlockPos pos, BlockState state) {
+		ItemStack mainHand = player.getMainHandItem();
+
 		boolean hasAnyTool = !FTBUltimineServerConfig.REQUIRE_TOOL.get()
 				|| !mainHand.isEmpty() && (mainHand.getItem() instanceof TieredItem || mainHand.getMaxDamage() > 0 || mainHand.is(ALLOW_TAG));
 
+		// ExpectPlatform
+		@SuppressWarnings("ConstantValue")
 		boolean hasValidTool = !FTBUltimineServerConfig.REQUIRE_VALID_TOOL_FOR_BLOCK.get()
 				|| !state.requiresCorrectToolForDrops()
-				|| mainHand.isCorrectToolForDrops(state);
+				|| PlatformUtil.playerHasCorrectTool(player, pos, state);
 
 		return hasAnyTool && hasValidTool;
 	}
@@ -222,7 +227,7 @@ public class FTBUltimine {
 	 * @param state the blockstate being broken (or about to be broken)
 	 * @return Result object with the reason that ultimine is not allowed.
 	 */
-	public CanUltimineResult canUltimine(Player player, BlockState state) {
+	public CanUltimineResult canUltimine(Player player, BlockPos pos, BlockState state) {
 		if (PlayerHooks.isFake(player) || player.getUUID() == null) {
 			return CanUltimineResult.OTHER_RESTRICTION;
 		}
@@ -246,15 +251,13 @@ public class FTBUltimine {
 			return CanUltimineResult.BLOCKED_TOOL;
 		}
 
-		if (!isValidTool(mainHand, state)) {
-			return CanUltimineResult.NO_TOOL;
-		}
-
-		return RestrictionHandlerRegistry.INSTANCE.canUltimine(player);
-	}
+        return isValidTool(player, pos, state) ?
+				RestrictionHandlerRegistry.INSTANCE.canUltimine(player) :
+				CanUltimineResult.NO_TOOL;
+    }
 
 	public EventResult blockBroken(Level world, BlockPos origPos, BlockState state, ServerPlayer player, @Nullable IntValue xp) {
-		if (isBreakingBlock || !canUltimine(player, state).isAllowed()) {
+		if (isBreakingBlock || !canUltimine(player, origPos, state).isAllowed()) {
 			return EventResult.pass();
 		}
 		FTBUltiminePlayerData data = getOrCreatePlayerData(player);
