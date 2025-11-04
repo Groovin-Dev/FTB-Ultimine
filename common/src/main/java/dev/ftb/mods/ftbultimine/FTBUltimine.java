@@ -206,15 +206,15 @@ public class FTBUltimine {
 		ItemStack mainHand = player.getMainHandItem();
 
 		boolean hasAnyTool = !FTBUltimineServerConfig.REQUIRE_TOOL.get()
-				|| !mainHand.isEmpty() && (mainHand.getItem() instanceof TieredItem || mainHand.getMaxDamage() > 0 || mainHand.is(ALLOW_TAG));
+				|| !mainHand.isEmpty() && (mainHand.getItem() instanceof TieredItem || mainHand.isDamageableItem() || mainHand.is(ALLOW_TAG));
+		if (!hasAnyTool) {
+			return false;
+		}
 
-		// ExpectPlatform
-		@SuppressWarnings("ConstantValue")
-		boolean hasValidTool = !FTBUltimineServerConfig.REQUIRE_VALID_TOOL_FOR_BLOCK.get()
+        //noinspection ConstantValue
+        return !FTBUltimineServerConfig.REQUIRE_VALID_TOOL_FOR_BLOCK.get()
 				|| !state.requiresCorrectToolForDrops()
 				|| PlatformUtil.playerHasCorrectTool(player, pos, state);
-
-		return hasAnyTool && hasValidTool;
 	}
 
 	/**
@@ -303,7 +303,8 @@ public class FTBUltimine {
 			}
 
 			float destroySpeed = state1.getDestroySpeed(world, pos);
-			if (!player.isCreative() && (destroySpeed < 0 || destroySpeed > baseSpeed /*|| !player.hasCorrectToolForDrops(state1)*/)) {
+            //noinspection ConstantValue
+            if (!player.isCreative() && (destroySpeed < 0 || destroySpeed > baseSpeed || !isValidTool(player, pos, state1))) {
 				continue;
 			}
 			if (!tryBreakBlock(player, pos, state, shape, bhr) && FTBUltimineServerConfig.CANCEL_ON_BLOCK_BREAK_FAIL.get()) {
