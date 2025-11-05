@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2101.1.12]
+
+### Added
+* Added "Require Valid Tool" server config setting
+  * This is in addition to the existing "Require Tool" setting
+  * Default is false. If true, player must be holding a _valid_ tool for the block being ultimined, i.e. be able to harvest the block's drops
+  * When false, this means that ultimining works on blocks not normally harvestable
+    * e.g. ultimining stone with a bare hand is permitted (although blocks will of course still not be dropped as items)
+  * This functions correctly with custom items which improve the player's harvest level, e.g. Digging Claws from the Artifacts mod
+* Added block tag `ftbultimine:single_crop_harvesting_blacklist`
+  * Skips single-block-harvesting for blocks in this tag
+  * Intended for crop blocks where custom right-click behaviour is required, e.g. a mod handling its own harvesting
+* Added client config `shape_feedback_hotbar_message` to control hotbar feedback message displayed when a new Ultimine shape is selected
+  * Default is false; set this to true if you prefer the previous behaviour
+
 ## [2101.1.11]
 
 ### Fixed

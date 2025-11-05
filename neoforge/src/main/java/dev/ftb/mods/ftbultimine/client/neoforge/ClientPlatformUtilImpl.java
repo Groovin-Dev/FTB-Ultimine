@@ -1,11 +1,9 @@
 package dev.ftb.mods.ftbultimine.client.neoforge;
 
 import net.minecraft.client.KeyMapping;
-import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.ItemAbilities;
 import org.lwjgl.glfw.GLFW;
 
-public class PlatformUtilImpl {
+public class ClientPlatformUtilImpl {
     public static boolean doesKeybindMatch(KeyMapping keyMapping, int keyCode, int scanCode, int modifiers) {
         if (keyMapping.matches(keyCode, scanCode)) {
             return switch (keyMapping.getKeyModifier()) {
@@ -16,17 +14,5 @@ public class PlatformUtilImpl {
             };
         }
         return false;
-    }
-
-    public static boolean canAxeStrip(ItemStack stack) {
-        return stack.getItem().canPerformAction(stack, ItemAbilities.AXE_STRIP);
-    }
-
-    public static boolean canTillSoil(ItemStack stack) {
-        return stack.getItem().canPerformAction(stack, ItemAbilities.HOE_TILL);
-    }
-
-    public static boolean canFlattenPath(ItemStack stack) {
-        return stack.getItem().canPerformAction(stack, ItemAbilities.SHOVEL_FLATTEN);
     }
 }

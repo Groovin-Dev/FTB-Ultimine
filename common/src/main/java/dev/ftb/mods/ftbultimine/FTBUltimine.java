@@ -33,6 +33,7 @@ import dev.ftb.mods.ftbultimine.net.SyncUltimineTimePacket;
 import dev.ftb.mods.ftbultimine.net.SyncUltimineTimePacket.TimeType;
 import dev.ftb.mods.ftbultimine.rightclick.*;
 import dev.ftb.mods.ftbultimine.shape.*;
+import dev.ftb.mods.ftbultimine.utils.PlatformUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
@@ -87,6 +88,7 @@ public class FTBUltimine {
 	public static final TagKey<Block> BLOCK_WHITELIST = TagKey.create(Registries.BLOCK, FTBUltimineAPI.id("block_whitelist"));
 	public static final TagKey<Block> TILLABLE_TAG = TagKey.create(Registries.BLOCK, FTBUltimineAPI.id("farmland_tillable"));
 	public static final TagKey<Block> FLATTENABLE_TAG = TagKey.create(Registries.BLOCK, FTBUltimineAPI.id("shovel_flattenable"));
+	public static final TagKey<Block> SINGLE_CROP_HARVESTING_BLACKLIST = TagKey.create(Registries.BLOCK, FTBUltimineAPI.id("single_crop_harvesting_blacklist"));
 
 	private static Predicate<Player> permissionOverride = player -> true;
 
@@ -196,20 +198,23 @@ public class FTBUltimine {
 	 * Validates if a tool is correct to use. If the required tool config is on, we have to be either a {@link TieredItem}
 	 * or have a max damage, or be added to the ALLOW_TAG.
 	 *
-	 * @param mainHand item in the main hand
+	 * @param player player being checked
 	 *
-	 * @return if the tool is valid to be used
+	 * @return if the player's equipped tool is valid to be used
 	 */
-	public static boolean isValidTool(ItemStack mainHand) {
-		if (FTBUltimineServerConfig.REQUIRE_TOOL.get()) {
-			if (mainHand.isEmpty()) {
-				return false;
-			}
+	public static boolean isValidTool(Player player, BlockPos pos, BlockState state) {
+		ItemStack mainHand = player.getMainHandItem();
 
-			return mainHand.getItem() instanceof TieredItem || mainHand.getMaxDamage() > 0 || mainHand.is(ALLOW_TAG);
+		boolean hasAnyTool = !FTBUltimineServerConfig.REQUIRE_TOOL.get()
+				|| !mainHand.isEmpty() && (mainHand.getItem() instanceof TieredItem || mainHand.isDamageableItem() || mainHand.is(ALLOW_TAG));
+		if (!hasAnyTool) {
+			return false;
 		}
 
-		return true;
+        //noinspection ConstantValue
+        return !FTBUltimineServerConfig.REQUIRE_VALID_TOOL_FOR_BLOCK.get()
+				|| !state.requiresCorrectToolForDrops()
+				|| PlatformUtil.playerHasCorrectTool(player, pos, state);
 	}
 
 	/**
@@ -220,9 +225,10 @@ public class FTBUltimine {
 	 * {@link FTBUltiminePlayerData#updateBlocks}, ultimine should be active and working.
 	 *
 	 * @param player Player to check status for
+	 * @param state the blockstate being broken (or about to be broken)
 	 * @return Result object with the reason that ultimine is not allowed.
 	 */
-	public CanUltimineResult canUltimine(Player player) {
+	public CanUltimineResult canUltimine(Player player, BlockPos pos, BlockState state) {
 		if (PlayerHooks.isFake(player) || player.getUUID() == null) {
 			return CanUltimineResult.OTHER_RESTRICTION;
 		}
@@ -246,15 +252,13 @@ public class FTBUltimine {
 			return CanUltimineResult.BLOCKED_TOOL;
 		}
 
-		if (!isValidTool(mainHand)) {
-			return CanUltimineResult.NO_TOOL;
-		}
-
-		return RestrictionHandlerRegistry.INSTANCE.canUltimine(player);
-	}
+        return isValidTool(player, pos, state) ?
+				RestrictionHandlerRegistry.INSTANCE.canUltimine(player) :
+				CanUltimineResult.NO_TOOL;
+    }
 
 	public EventResult blockBroken(Level world, BlockPos origPos, BlockState state, ServerPlayer player, @Nullable IntValue xp) {
-		if (isBreakingBlock || !canUltimine(player).isAllowed()) {
+		if (isBreakingBlock || !canUltimine(player, origPos, state).isAllowed()) {
 			return EventResult.pass();
 		}
 		FTBUltiminePlayerData data = getOrCreatePlayerData(player);
@@ -299,7 +303,8 @@ public class FTBUltimine {
 			}
 
 			float destroySpeed = state1.getDestroySpeed(world, pos);
-			if (!player.isCreative() && (destroySpeed < 0 || destroySpeed > baseSpeed || !player.hasCorrectToolForDrops(state1))) {
+            //noinspection ConstantValue
+            if (!player.isCreative() && (destroySpeed < 0 || destroySpeed > baseSpeed || !isValidTool(player, pos, state1))) {
 				continue;
 			}
 			if (!tryBreakBlock(player, pos, state, shape, bhr) && FTBUltimineServerConfig.CANCEL_ON_BLOCK_BREAK_FAIL.get()) {
