@@ -83,5 +83,9 @@
 	"ftbultimine.server_settings.misc.prevent_tool_break": "Tool Breakage Protection",
 	"ftbultimine.server_settings.misc.prevent_tool_break.tooltip": "Ultimining will stop if the equipped tool has this much durability or less remaining. Setting this to 0 allows tools to break.",
 	"ftbultimine.server_settings.misc.cancel_on_block_break_fail": "Cancel on Block Break Failure",
-	"ftbultimine.server_settings.misc.cancel_on_block_break_fail.tooltip": "Advanced setting: stop digging if unbreakable blocks are encountered instead of skipping over those blocks"
+	"ftbultimine.server_settings.misc.cancel_on_block_break_fail.tooltip": "Advanced setting: stop digging if unbreakable blocks are encountered instead of skipping over those blocks",
+	"ftbultimine.modifier.max_blocks": "FTB Ultimine Max Blocks",
+	"ftbultimine.modifier.cooldown": "FTB Ultimine Cooldown Ticks",
+	"ftbultimine.modifier.exhaustion": "FTB Ultimine Food Consumption",
+	"ftbultimine.modifier.experience": "FTB Ultimine Experience Cost"
 }

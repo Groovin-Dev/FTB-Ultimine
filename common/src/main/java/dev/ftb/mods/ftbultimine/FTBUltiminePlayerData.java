@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.IntSupplier;
 
 /**
  * Server-side player data
@@ -106,7 +107,7 @@ public class FTBUltiminePlayerData {
 		}
 	}
 
-	public void checkBlocks(ServerPlayer player, boolean sendUpdate, int maxBlocks) {
+	public void checkBlocks(ServerPlayer player, boolean sendUpdate, IntSupplier maxBlocks) {
 		if (!pressed) {
 			return;
 		}
@@ -126,7 +127,7 @@ public class FTBUltiminePlayerData {
 		}
 
 		if (cachedDirection != hitResult.getDirection() || cachedPos == null || !cachedPos.equals(hitResult.getBlockPos())) {
-			updateBlocks(player, hitResult.getBlockPos(), hitResult.getDirection(), sendUpdate, maxBlocks);
+			updateBlocks(player, hitResult.getBlockPos(), hitResult.getDirection(), sendUpdate, maxBlocks.getAsInt());
 		}
 	}
 

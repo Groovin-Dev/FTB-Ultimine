@@ -32,6 +32,7 @@ import dev.ftb.mods.ftbultimine.net.SendShapePacket;
 import dev.ftb.mods.ftbultimine.net.SyncUltimineTimePacket;
 import dev.ftb.mods.ftbultimine.net.SyncUltimineTimePacket.TimeType;
 import dev.ftb.mods.ftbultimine.rightclick.*;
+import dev.ftb.mods.ftbultimine.registry.ModAttributes;
 import dev.ftb.mods.ftbultimine.shape.*;
 import dev.ftb.mods.ftbultimine.utils.PlatformUtil;
 import net.minecraft.core.BlockPos;
@@ -106,7 +107,7 @@ public class FTBUltimine {
 				true, FTBUltimineServerConfig::onConfigChanged);
 
 		FTBUltimineNet.init();
-
+		ModAttributes.init();
 		IntegrationHandler.init();
 
 		proxy = EnvExecutor.getEnvSpecific(() -> FTBUltimineClient::new, () -> FTBUltimineCommon::new);
@@ -399,7 +400,7 @@ public class FTBUltimine {
 
 		int didWork = RightClickDispatcher.INSTANCE.dispatchRightClick(shapeContext, hand, data);
 		if (didWork > 0) {
-			player.swing(hand);
+			serverPlayer.swing(hand);
 			if (!player.isCreative()) {
 				CooldownTracker.setLastUltimineTime(player, System.currentTimeMillis());
 				data.addPendingXPCost(serverPlayer, Math.max(0, didWork - 1));
@@ -413,7 +414,7 @@ public class FTBUltimine {
 	public void playerTick(Player player) {
 		if (player instanceof ServerPlayer serverPlayer) {
 			FTBUltiminePlayerData data = getOrCreatePlayerData(player);
-			data.checkBlocks(serverPlayer, true, FTBUltimineServerConfig.getMaxBlocks(serverPlayer));
+			data.checkBlocks(serverPlayer, true, () -> FTBUltimineServerConfig.getMaxBlocks(serverPlayer));
 			data.takePendingXP(serverPlayer);
 		}
 	}
