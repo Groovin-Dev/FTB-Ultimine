@@ -1,9 +1,6 @@
 package dev.ftb.mods.ftbultimine.config;
 
-import dev.ftb.mods.ftblibrary.snbt.config.BooleanValue;
-import dev.ftb.mods.ftblibrary.snbt.config.EnumValue;
-import dev.ftb.mods.ftblibrary.snbt.config.IntValue;
-import dev.ftb.mods.ftblibrary.snbt.config.SNBTConfig;
+import dev.ftb.mods.ftblibrary.snbt.config.*;
 import dev.ftb.mods.ftblibrary.util.PanelPositioning;
 
 import static dev.ftb.mods.ftbultimine.api.FTBUltimineAPI.MOD_ID;
@@ -44,4 +41,5 @@ public interface FTBUltimineClientConfig {
 	EnumValue<PanelPositioning> OVERLAY_POS = OVERLAY.addEnum("overlay_pos", PanelPositioning.NAME_MAP, PanelPositioning.TOP_LEFT);
 	IntValue OVERLAY_INSET_X = OVERLAY.addInt("overlay_inset_x", 2);
 	IntValue OVERLAY_INSET_Y = OVERLAY.addInt("overlay_inset_y", 2);
+	DoubleValue OVERLAY_SCALE = OVERLAY.addDouble("overlay_scale", 1.0);
 }
