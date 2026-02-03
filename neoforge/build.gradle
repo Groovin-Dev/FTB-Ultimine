@@ -53,7 +53,8 @@ processResources {
 				"neoforgeversionrange": project.neoforge_version_range,
 				"neoforgeloaderversion": project.neoforge_loader_version,
 				"mcversion": project.minecraft_version,
-				"ftblibraryversion": project.ftb_library_version
+				"ftblibraryversion": project.ftb_library_version,
+				"ftbezcrystalsversion": project.ftb_ez_crystals_version
 	}
 }
 
