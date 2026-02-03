@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 * Allow `FTBUltimineAPI#currentBlockSelection()` to be called on the client
+* Updated to work with (and requires) FTB EZ Crystals 21.1.1, if present
 
 ## [2101.1.12]
 
