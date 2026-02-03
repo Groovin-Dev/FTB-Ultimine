@@ -104,6 +104,11 @@ public class FTBUltimineClient extends FTBUltimineCommon {
 		}
 	}
 
+	@Override
+	public Collection<BlockPos> getSelectedBlocks(Player player) {
+		return actualBlocks == 0 || shapeBlocks.isEmpty() ? null : shapeBlocks;
+	}
+
 	public void renderInGame(PoseStack stack) {
 		if (!pressed || cachedPos == null || cachedEdges == null || cachedEdges.isEmpty()) {
 			return;
@@ -127,8 +132,8 @@ public class FTBUltimineClient extends FTBUltimineCommon {
 		VertexConsumer buffer = mc.renderBuffers().bufferSource().getBuffer(UltimineRenderTypes.LINES_NORMAL);
 
 		for (CachedEdge edge : cachedEdges) {
-			buffer.addVertex(matrix, edge.x1, edge.y1, edge.z1).setColor(255, 255, 255, 255);
-			buffer.addVertex(matrix, edge.x2, edge.y2, edge.z2).setColor(255, 255, 255, 255);
+			buffer.addVertex(matrix, edge.x1(), edge.y1(), edge.z1()).setColor(255, 255, 255, 255);
+			buffer.addVertex(matrix, edge.x2(), edge.y2(), edge.z2()).setColor(255, 255, 255, 255);
 		}
 
 		mc.renderBuffers().bufferSource().endBatch(UltimineRenderTypes.LINES_NORMAL);
@@ -137,8 +142,8 @@ public class FTBUltimineClient extends FTBUltimineCommon {
 
 		int alpha = FTBUltimineClientConfig.PREVIEW_LINE_ALPHA.get();
 		for (CachedEdge edge : cachedEdges) {
-			buffer2.addVertex(matrix, edge.x1, edge.y1, edge.z1).setColor(255, 255, 255, alpha);
-			buffer2.addVertex(matrix, edge.x2, edge.y2, edge.z2).setColor(255, 255, 255, alpha);
+			buffer2.addVertex(matrix, edge.x1(), edge.y1(), edge.z1()).setColor(255, 255, 255, alpha);
+			buffer2.addVertex(matrix, edge.x2(), edge.y2(), edge.z2()).setColor(255, 255, 255, alpha);
 		}
 
 		mc.renderBuffers().bufferSource().endBatch(UltimineRenderTypes.LINES_TRANSPARENT);
@@ -253,7 +258,7 @@ public class FTBUltimineClient extends FTBUltimineCommon {
 			int width = Math.max(maxPanelWidth, 10 + infoPanelList.stream().map(l -> font.width(l.text)).max(Integer::compareTo).orElse(100));
 			maxPanelWidth = width;
 			int height = font.lineHeight * infoPanelList.size();
-			float scale = 1f;
+			float scale = FTBUltimineClientConfig.OVERLAY_SCALE.get().floatValue();
 
 			int insetX = FTBUltimineClientConfig.OVERLAY_INSET_X.get();
 			int insetY = FTBUltimineClientConfig.OVERLAY_INSET_Y.get();
@@ -337,26 +342,14 @@ public class FTBUltimineClient extends FTBUltimineCommon {
 		}
 
 		cachedPos = shapeBlocks.getFirst();
-
-		double d = 0.005D;
-
 		cachedEdges = new ArrayList<>();
 
 		Collection<VoxelShape> shapes = new HashSet<>();
 		for (AABB aabb : ShapeMerger.merge(shapeBlocks, cachedPos)) {
-			shapes.add(Shapes.create(aabb.inflate(d)));
+			shapes.add(Shapes.create(aabb.inflate(0.005D)));
 		}
 
-		orShapes(shapes).forAllEdges((x1, y1, z1, x2, y2, z2) -> {
-			CachedEdge edge = new CachedEdge();
-			edge.x1 = (float) x1;
-			edge.y1 = (float) y1;
-			edge.z1 = (float) z1;
-			edge.x2 = (float) x2;
-			edge.y2 = (float) y2;
-			edge.z2 = (float) z2;
-			cachedEdges.add(edge);
-		});
+		orShapes(shapes).forAllEdges((x1, y1, z1, x2, y2, z2) -> cachedEdges.add(CachedEdge.fromDoubles(x1, y1, z1, x2, y2, z2)));
 	}
 
 	static VoxelShape orShapes(Collection<VoxelShape> shapes) {
@@ -364,7 +357,7 @@ public class FTBUltimineClient extends FTBUltimineCommon {
 		for (VoxelShape shape : shapes) {
 			combinedShape = Shapes.joinUnoptimized(combinedShape, shape, BooleanOp.OR);
 		}
-		return combinedShape;
+		return combinedShape.optimize();
 	}
 
 	private record IndentedLine(int indent, Component text) {

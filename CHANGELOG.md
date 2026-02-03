@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2101.1.13]
+
+### Added
+* Registered some custom player attributes which can be used affect how players can ultimine:
+  * `ftbultimine:max_blocks_modifier`
+  * `ftbultimine:cooldown_modifier`
+  * `ftbultimine:exhaustion_modifier`
+  * `ftbultimine:experience_modifier`
+  * Can be added to players with the `/attribute` command, 
+    * e.g. increase a player's max blocks by 20 with `/attribute @s ftbultimine:max_blocks_modifier modifier add my:modifier 20 add_value`
+* Added client config setting to control scaling of the overlay panel in the GUI
+
+### Fixed
+* Allow `FTBUltimineAPI#currentBlockSelection()` to be called on the client
+* Updated to work with (and requires) FTB EZ Crystals 21.1.1, if present
+
 ## [2101.1.12]
 
 ### Added

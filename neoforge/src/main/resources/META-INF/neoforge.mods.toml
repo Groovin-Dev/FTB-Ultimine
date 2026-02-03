@@ -43,3 +43,10 @@ versionRange = "[${ftblibraryversion},)"
 ordering = "NONE"
 side = "BOTH"
 
+[[dependencies.ftbultimine]]
+modId = "ftbezcrystals"
+type = "optional"
+versionRange = "[${ftbezcrystalsversion},)"
+ordering = "NONE"
+side = "BOTH"
+
