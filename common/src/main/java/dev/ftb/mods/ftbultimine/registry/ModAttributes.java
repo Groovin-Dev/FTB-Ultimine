@@ -19,9 +19,9 @@ public class ModAttributes {
     public static final RegistrySupplier<Attribute> COOLDOWN_MODIFIER
             = ATTRIBUTES.register("cooldown_modifier", () -> new RangedAttribute("ftbultimine.modifier.cooldown", 0.0, -Double.MAX_VALUE, Double.MAX_VALUE));
     public static final RegistrySupplier<Attribute> EXHAUSTION_MODIFIER
-            = ATTRIBUTES.register("exhaustion_modifier", () -> new RangedAttribute("ftbultimine.modifier.cooldown", 0.0, -Double.MAX_VALUE, Double.MAX_VALUE));
+            = ATTRIBUTES.register("exhaustion_modifier", () -> new RangedAttribute("ftbultimine.modifier.exhaustion", 0.0, -Double.MAX_VALUE, Double.MAX_VALUE));
     public static final RegistrySupplier<Attribute> EXPERIENCE_MODIFIER
-            = ATTRIBUTES.register("experience_modifier", () -> new RangedAttribute("ftbultimine.modifier.cooldown", 0.0, -Double.MAX_VALUE, Double.MAX_VALUE));
+            = ATTRIBUTES.register("experience_modifier", () -> new RangedAttribute("ftbultimine.modifier.experience", 0.0, -Double.MAX_VALUE, Double.MAX_VALUE));
 
     public static void init() {
         ATTRIBUTES.register();
