@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2101.1.13]
 
+### Added
+* Added client config setting to control scaling of the overlay panel in the GUI
+
 ### Fixed
 * Allow `FTBUltimineAPI#currentBlockSelection()` to be called on the client
 * Updated to work with (and requires) FTB EZ Crystals 21.1.1, if present
