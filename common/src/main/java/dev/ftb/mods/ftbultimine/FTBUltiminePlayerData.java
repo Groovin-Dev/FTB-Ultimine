@@ -5,6 +5,7 @@ import dev.ftb.mods.ftbultimine.api.shape.Shape;
 import dev.ftb.mods.ftbultimine.api.shape.ShapeContext;
 import dev.ftb.mods.ftbultimine.config.FTBUltimineServerConfig;
 import dev.ftb.mods.ftbultimine.net.SendShapePacket;
+import dev.ftb.mods.ftbultimine.shape.BlockMatcher;
 import dev.ftb.mods.ftbultimine.shape.BlockMatchers;
 import dev.ftb.mods.ftbultimine.shape.ShapeRegistry;
 import net.minecraft.commands.CommandSourceStack;
@@ -17,9 +18,13 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.jspecify.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.IntSupplier;
 
@@ -28,6 +33,7 @@ public class FTBUltiminePlayerData {
 	private final UUID playerId;
 	private boolean pressed = false;
 	private int shapeIndex = 0;
+	private boolean autoShapelessOnOre = false;
 	private double pendingXPCost;
 
 	@Nullable
@@ -58,6 +64,10 @@ public class FTBUltiminePlayerData {
 
 	public void setPressed(boolean pressed) {
 		this.pressed = pressed;
+	}
+
+	public void setAutoShapelessOnOre(boolean autoShapelessOnOre) {
+		this.autoShapelessOnOre = autoShapelessOnOre;
 	}
 
 	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
@@ -150,6 +160,9 @@ public class FTBUltiminePlayerData {
 			ShapeContext.Matcher matcher = BlockMatchers.determineBestMatcher(player.level(), cachedPos, origState, shape);
 			context = new ShapeContext(player, cachedPos, cachedDirection, origState, matcher, maxBlocks);
 			cachedBlocks = shape.getBlocks(context);
+			if (autoShapelessOnOre && !shape.isIndeterminateShape()) {
+				cachedBlocks = expandOreVeins(player, cachedDirection, cachedBlocks);
+			}
 			if (FTBUltimineServerConfig.getExperiencePerBlock(player) > 0d) {
 				int max = (int) (player.totalExperience / FTBUltimineServerConfig.getExperiencePerBlock(player));
 				if (max < cachedBlocks.size()) {
@@ -163,6 +176,36 @@ public class FTBUltiminePlayerData {
 		}
 
 		return context;
+	}
+
+	private List<BlockPos> expandOreVeins(ServerPlayer player, Direction dir, List<BlockPos> tunnelBlocks) {
+		int maxVeinBlocks = FTBUltimineServerConfig.MAX_ORE_VEIN_BLOCKS.get();
+		if (maxVeinBlocks <= 0) return tunnelBlocks;
+
+		Shape defaultShape = ShapeRegistry.getInstance(false).getDefaultShape();
+		if (defaultShape == null) return tunnelBlocks;
+
+		ShapeContext.Matcher oreMatcher = BlockMatcher.wrap(
+				(orig, test) -> FTBUltimineServerConfig.ORE_VEIN_TAGS.match(orig, test)
+		);
+
+		Set<BlockPos> result = new LinkedHashSet<>(tunnelBlocks);
+		Set<BlockPos> claimedOrePositions = new HashSet<>();
+
+		for (BlockPos tunnelPos : tunnelBlocks) {
+			if (claimedOrePositions.contains(tunnelPos)) continue;
+
+			BlockState state = player.level().getBlockState(tunnelPos);
+			if (FTBUltimineServerConfig.ORE_VEIN_TAGS.getTags().stream().noneMatch(state::is)) continue;
+
+			ShapeContext oreContext = new ShapeContext(player, tunnelPos, dir, state, oreMatcher, maxVeinBlocks);
+			List<BlockPos> vein = defaultShape.getBlocks(oreContext);
+
+			claimedOrePositions.addAll(vein);
+			result.addAll(vein);
+		}
+
+		return new ArrayList<>(result);
 	}
 
 }

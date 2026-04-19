@@ -146,9 +146,10 @@ public class FTBUltimine {
 		}
 	}
 
-	public void setKeyPressed(ServerPlayer player, boolean pressed) {
+	public void setKeyPressed(ServerPlayer player, boolean pressed, boolean autoShapelessOnOre) {
 		FTBUltiminePlayerData data = getOrCreatePlayerData(player);
 		data.setPressed(pressed);
+		data.setAutoShapelessOnOre(autoShapelessOnOre);
 		data.clearCache();
 
 		if (!data.isPressed()) {

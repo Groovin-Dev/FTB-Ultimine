@@ -52,4 +52,9 @@ public class ShapeRegistry {
     public int shapeCount() {
         return shapesList.size();
     }
+
+    @Nullable
+    public Shape getDefaultShape() {
+        return defaultShape;
+    }
 }

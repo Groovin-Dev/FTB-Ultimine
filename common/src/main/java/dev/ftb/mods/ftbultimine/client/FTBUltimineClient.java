@@ -329,7 +329,7 @@ public class FTBUltimineClient {
 		boolean p = ultimineKeyPressed;
 
 		if ((ultimineKeyPressed = keyBindUltimine.isDown()) != p) {
-			Play2ServerNetworking.send(new KeyPressedPacket(ultimineKeyPressed));
+			Play2ServerNetworking.send(new KeyPressedPacket(ultimineKeyPressed, FTBUltimineClientConfig.AUTO_SHAPELESS_ON_ORE.get()));
 
 			if (ultimineKeyPressed && !hasScrolledYet && mc.player != null) {
 				MutableComponent msg1 = Component.translatable(FTBUltimineClientConfig.REQUIRE_SNEAK_FOR_MENU.get() ?

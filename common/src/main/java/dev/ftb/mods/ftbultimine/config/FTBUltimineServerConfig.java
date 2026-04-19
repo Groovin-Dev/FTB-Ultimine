@@ -86,11 +86,24 @@ public interface FTBUltimineServerConfig {
 	BooleanValue CANCEL_ON_BLOCK_BREAK_FAIL = MISC.addBoolean("cancel_on_block_break_fail", false)
 			.comment("If a block couldn't be broken (even though it should be), stop ultimining immediately instead of skipping to the next block.");
 
+	IntValue MAX_ORE_VEIN_BLOCKS = MISC.addInt("max_ore_vein_blocks", 64, 1, 1024)
+			.comment("When auto_shapeless_on_ore is enabled, the maximum blocks mined per ore vein.",
+					"Each vein touched by a shaped mining operation gets this many blocks independently of max_blocks.");
+
+	BlockTagsConfig ORE_VEIN_TAGS = new BlockTagsConfig(MISC, "ore_vein_tags",
+			new ArrayList<>(List.of(
+					"c:ores/*",
+					"forge:ores/*"
+			)),
+			"Block tags considered 'ore' for the auto_shapeless_on_ore feature.",
+			"Blocks matching these tags trigger shapeless vein expansion when touched by a shaped mining mode.");
+
 	///
 	static void onConfigChanged(boolean isServerSide) {
 		if (isServerSide) {
 			MERGE_TAGS_SHAPELESS.tags.invalidate();
 			MERGE_TAGS_SHAPED.tags.invalidate();
+			ORE_VEIN_TAGS.tags.invalidate();
 
 			if (MAX_BLOCKS.get() > 8192) {
 				LOGGER.warn("'max_blocks' server config setting is set to more than 8192 blocks; this may cause performance issues!");
