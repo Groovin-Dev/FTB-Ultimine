@@ -21,6 +21,9 @@ public interface FTBUltimineClientConfig {
 			.comment("Does the player need to be holding the Ultimine key to cycle through shapes with the keyboard?");
 	BooleanValue SHAPE_FEEDBACK_MESSAGE = GENERAL.addBoolean("shape_feedback_hotbar_message", false)
 			.comment("When true, display the newly-selected shape as a hotbar message after an Ultimine shape change");
+	BooleanValue AUTO_SHAPELESS_ON_ORE = GENERAL.addBoolean("auto_shapeless_on_ore", false)
+			.comment("When using a shaped mining mode, automatically mine the full ore vein for any ore the shape touches.",
+					"Each vein is mined independently up to the server's 'max_ore_vein_blocks' limit.");
 
 	SNBTConfig RENDERING = CONFIG.addGroup("rendering");
 	IntValue RENDER_OUTLINE = RENDERING.addInt("render_outline", 256)

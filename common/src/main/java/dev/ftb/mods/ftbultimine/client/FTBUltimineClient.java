@@ -314,7 +314,7 @@ public class FTBUltimineClient extends FTBUltimineCommon {
 		boolean p = pressed;
 
 		if ((pressed = keyBindUltimine.isDown()) != p) {
-			NetworkManager.sendToServer(new KeyPressedPacket(pressed));
+			NetworkManager.sendToServer(new KeyPressedPacket(pressed, FTBUltimineClientConfig.AUTO_SHAPELESS_ON_ORE.get()));
 
 			if (pressed && !hasScrolledYet && mc.player != null) {
 				MutableComponent msg1 = Component.translatable(FTBUltimineClientConfig.REQUIRE_SNEAK_FOR_MENU.get() ?

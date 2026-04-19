@@ -4,6 +4,7 @@ import dev.ftb.mods.ftbultimine.FTBUltimine;
 import dev.ftb.mods.ftbultimine.api.shape.RegisterShapeEvent;
 import dev.ftb.mods.ftbultimine.api.shape.Shape;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -47,5 +48,10 @@ public enum ShapeRegistry implements RegisterShapeEvent.Registry {
 
     public int shapeCount() {
         return shapesList.size();
+    }
+
+    @Nullable
+    public Shape getDefaultShape() {
+        return defaultShape;
     }
 }

@@ -178,9 +178,10 @@ public class FTBUltimine {
 		BlockSelectionRegistry.getInstance().clear();
 	}
 
-	public void setKeyPressed(ServerPlayer player, boolean pressed) {
+	public void setKeyPressed(ServerPlayer player, boolean pressed, boolean autoShapelessOnOre) {
 		FTBUltiminePlayerData data = getOrCreatePlayerData(player);
 		data.setPressed(pressed);
+		data.setAutoShapelessOnOre(autoShapelessOnOre);
 		data.clearCache();
 
 		if (!data.isPressed()) {
@@ -304,8 +305,10 @@ public class FTBUltimine {
 			}
 
 			float destroySpeed = state1.getDestroySpeed(world, pos);
+			boolean strengthExempt = FTBUltimineServerConfig.MINE_ORES_REGARDLESS_OF_STRENGTH.get()
+					&& FTBUltimineServerConfig.ORE_VEIN_TAGS.getTags().stream().anyMatch(state1::is);
             //noinspection ConstantValue
-            if (!player.isCreative() && (destroySpeed < 0 || destroySpeed > baseSpeed || !isValidTool(player, pos, state1))) {
+            if (!player.isCreative() && (destroySpeed < 0 || (!strengthExempt && destroySpeed > baseSpeed) || !isValidTool(player, pos, state1))) {
 				continue;
 			}
 			if (!tryBreakBlock(player, pos, state, shape, bhr) && FTBUltimineServerConfig.CANCEL_ON_BLOCK_BREAK_FAIL.get()) {

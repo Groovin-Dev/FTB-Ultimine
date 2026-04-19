@@ -92,6 +92,19 @@ public interface FTBUltimineServerConfig {
 
 	BooleanValue CANCEL_ON_BLOCK_BREAK_FAIL = MISC.addBoolean("cancel_on_block_break_fail", false)
 			.comment("If a block couldn't be broken (even though it should be), stop ultimining immediately instead of skipping to the next block.");
+	BooleanValue MINE_ORES_REGARDLESS_OF_STRENGTH = MISC.addBoolean("mine_ores_regardless_of_strength", false)
+			.comment("When true, ore blocks (matched by ore_vein_tags) will not be skipped due to being harder than the initially broken block.",
+					"Useful when mining stone that contains ores, since ores are typically harder than stone.");
+	IntValue MAX_ORE_VEIN_BLOCKS = MISC.addInt("max_ore_vein_blocks", 64, 1, 1024)
+			.comment("When auto_shapeless_on_ore is enabled, the maximum blocks mined per ore vein.",
+					"Each vein touched by a shaped mining operation gets this many blocks independently of max_blocks.");
+	BlockTagsConfig ORE_VEIN_TAGS = new BlockTagsConfig(MISC, "ore_vein_tags",
+			new ArrayList<>(List.of(
+					"c:ores/*",
+					"forge:ores/*"
+			)),
+			"Block tags considered 'ore' for the auto_shapeless_on_ore feature.",
+			"Blocks matching these tags trigger shapeless vein expansion when touched by a shaped mining mode.");
 
 //	BooleanValue USE_TRINKET = CONFIG.addBoolean("use_trinket", false)
 //			.comment("(This only works if the mod 'Lost Trinkets' is installed!)",
@@ -104,6 +117,7 @@ public interface FTBUltimineServerConfig {
 		if (isServerSide) {
 			MERGE_TAGS_SHAPELESS.tags = null;
 			MERGE_TAGS_SHAPED.tags = null;
+			ORE_VEIN_TAGS.tags = null;
 
 			if (MAX_BLOCKS.get() > 8192) {
 				LOGGER.warn("'max_blocks' server config setting is set to more than 8192 blocks; this may cause performance issues!");

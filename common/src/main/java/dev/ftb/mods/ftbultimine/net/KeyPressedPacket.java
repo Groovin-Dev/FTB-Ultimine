@@ -9,11 +9,12 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 
-public record KeyPressedPacket(boolean pressed) implements CustomPacketPayload {
+public record KeyPressedPacket(boolean pressed, boolean autoShapelessOnOre) implements CustomPacketPayload {
     public static final Type<KeyPressedPacket> TYPE = new Type<>(FTBUltimineAPI.id("key_pressed_packet"));
 
     public static final StreamCodec<FriendlyByteBuf, KeyPressedPacket> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.BOOL, KeyPressedPacket::pressed,
+            ByteBufCodecs.BOOL, KeyPressedPacket::autoShapelessOnOre,
             KeyPressedPacket::new
     );
 
@@ -23,6 +24,7 @@ public record KeyPressedPacket(boolean pressed) implements CustomPacketPayload {
     }
 
     public static void handle(KeyPressedPacket message, NetworkManager.PacketContext context) {
-        context.queue(() -> FTBUltimine.instance.setKeyPressed((ServerPlayer) context.getPlayer(), message.pressed));
+        context.queue(() -> FTBUltimine.instance.setKeyPressed(
+                (ServerPlayer) context.getPlayer(), message.pressed(), message.autoShapelessOnOre()));
     }
 }
