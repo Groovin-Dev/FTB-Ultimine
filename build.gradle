@@ -2,7 +2,6 @@ plugins {
 	id 'java-library'
 	id 'net.fabricmc.fabric-loom' version '1.15.2' apply(false)
 	id 'net.neoforged.moddev' version '2.0.141' apply(false)
-	id "me.modmuss50.mod-publish-plugin" version "1.1.0"
 }
 
 tasks.named('wrapper', Wrapper).configure {
@@ -100,43 +99,3 @@ idea {
 	}
 }
 
-publishMods {
-	dryRun = providers.environmentVariable("CURSEFORGE_KEY").getOrNull() == null || providers.environmentVariable("SKIP_CURSEFORGE").getOrNull() != null
-	changelog = createChangelog(project)
-	version = project.version
-	type = createReleaseType(project)
-
-	def createOptions = (String projectName) -> {
-		publishOptions {
-			file = project.provider { project(":$projectName").tasks.jar }.flatMap { it.archiveFile }
-			displayName = "${readable_name} ${projectName.capitalize()} ${project.version}"
-			modLoaders.add(projectName.toLowerCase())
-		}
-	}
-
-	def fabricOptions = createOptions("fabric")
-	def neoForgeOptions = createOptions("neoforge")
-
-	def curseForgeOptions = curseforgeOptions {
-		accessToken = providers.environmentVariable("CURSEFORGE_KEY")
-		supported_minecraft_versions.split(",").each {
-			minecraftVersions.add(it.trim())
-		}
-		javaVersions.add(JavaVersion.VERSION_25)
-	}
-
-	curseforge("curseforgeFabric") {
-		from(curseForgeOptions, fabricOptions)
-		projectId = curseforge_id_fabric
-		requires('fabric-api')
-		requires('ftb-library-fabric')
-		optional('ftb-ranks-fabric')
-	}
-
-	curseforge("curseforgeNeoForge") {
-		from(curseForgeOptions, neoForgeOptions)
-		projectId = curseforge_id_forge
-		requires('ftb-library-forge')
-		optional('ftb-ranks-forge')
-	}
-}
